@@ -3651,8 +3651,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int interceptMotionBeforeQueueingWhenScreenOff(int policyFlags) {
         int result = 0;
 
-        final boolean isWakeMotion = (policyFlags
-                & (WindowManagerPolicy.FLAG_WAKE | WindowManagerPolicy.FLAG_WAKE_DROPPED)) != 0;
+        final int policyflag = (policyFlags
+                & (WindowManagerPolicy.FLAG_WAKE | WindowManagerPolicy.FLAG_WAKE_DROPPED));
+        final boolean isWakeMotion = (policyflag != 0);
+            // Quick hack to (permanently) enable trackball wake.  policyflag is hacked as 3 when pressed.
         if (isWakeMotion) {
             if (mKeyguardMediator != null && mKeyguardMediator.isShowing()) {
                 // If the keyguard is showing, let it decide what to do with the wake motion.
