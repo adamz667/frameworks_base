@@ -5977,18 +5977,35 @@ public class WindowManagerService extends IWindowManager.Stub
             unrotDw = dw;
             unrotDh = dh;
         }
-        int sw = reduceConfigWidthSize(unrotDw, Surface.ROTATION_0, density, unrotDw, unrotDh);
-        sw = reduceConfigWidthSize(sw, Surface.ROTATION_90, density, unrotDh, unrotDw);
-        sw = reduceConfigWidthSize(sw, Surface.ROTATION_180, density, unrotDw, unrotDh);
-        sw = reduceConfigWidthSize(sw, Surface.ROTATION_270, density, unrotDh, unrotDw);
-        int sl = Configuration.SCREENLAYOUT_SIZE_XLARGE
+
+        // TabletUI - cheat system that we are bigger then we are
+        int sl;
+        //If LCD density is set to >= 180 then treat it like a normal smartphone screen
+        if (DisplayMetrics.DENSITY_DEVICE >= 180) {
+           int sw = reduceConfigWidthSize((int)(unrotDw / density), Surface.ROTATION_0, density, unrotDw, unrotDh);
+           sw = reduceConfigWidthSize(sw, Surface.ROTATION_90, density, unrotDh, unrotDw);
+           sw = reduceConfigWidthSize(sw, Surface.ROTATION_180, density, unrotDw, unrotDh);
+           sw = reduceConfigWidthSize(sw, Surface.ROTATION_270, density, unrotDh, unrotDw);
+           outConfig.smallestScreenWidthDp = sw;
+
+           sl = Configuration.SCREENLAYOUT_SIZE_XLARGE
                 | Configuration.SCREENLAYOUT_LONG_YES;
-        sl = reduceConfigLayout(sl, Surface.ROTATION_0, density, unrotDw, unrotDh);
-        sl = reduceConfigLayout(sl, Surface.ROTATION_90, density, unrotDh, unrotDw);
-        sl = reduceConfigLayout(sl, Surface.ROTATION_180, density, unrotDw, unrotDh);
-        sl = reduceConfigLayout(sl, Surface.ROTATION_270, density, unrotDh, unrotDw);
-        outConfig.smallestScreenWidthDp = sw;
-        outConfig.screenLayout = sl;
+           sl = reduceConfigLayout(sl, Surface.ROTATION_0, density, unrotDw, unrotDh);
+           sl = reduceConfigLayout(sl, Surface.ROTATION_90, density, unrotDh, unrotDw);
+           sl = reduceConfigLayout(sl, Surface.ROTATION_180, density, unrotDw, unrotDh);
+           sl = reduceConfigLayout(sl, Surface.ROTATION_270, density, unrotDh, unrotDw);
+           outConfig.screenLayout = sl;
+        //If LCD density is set to <= 170 than cheat system that we have a bigger screen (sl)
+        //and higher dp - 600
+        } else if (DisplayMetrics.DENSITY_DEVICE <= 170) {
+           sl = 1; //cheat 1
+           sl = reduceConfigLayout(sl, Surface.ROTATION_0, density, unrotDw, unrotDh);
+           sl = reduceConfigLayout(sl, Surface.ROTATION_90, density, unrotDh, unrotDw);
+           sl = reduceConfigLayout(sl, Surface.ROTATION_180, density, unrotDw, unrotDh);
+           sl = reduceConfigLayout(sl, Surface.ROTATION_270, density, unrotDh, unrotDw);
+           outConfig.screenLayout = sl;
+           outConfig.smallestScreenWidthDp = 600; // cheat 2
+        }
     }
 
     private int reduceCompatConfigWidthSize(int curSize, int rotation, DisplayMetrics dm,
@@ -6063,10 +6080,8 @@ public class WindowManagerService extends IWindowManager.Stub
         int orientation = Configuration.ORIENTATION_SQUARE;
         if (dw < dh) {
             orientation = Configuration.ORIENTATION_PORTRAIT;
-            SystemProperties.set("sys.orientation.landscape", "0");
         } else if (dw > dh) {
             orientation = Configuration.ORIENTATION_LANDSCAPE;
-            SystemProperties.set("sys.orientation.landscape", "1");
         }
         config.orientation = orientation;
 

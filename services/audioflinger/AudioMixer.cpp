@@ -1247,4 +1247,3 @@ void AudioMixer::process__TwoTracks16BitsStereoNoResampling(state_t* state)
 
 // ----------------------------------------------------------------------------
 }; // namespace android
-

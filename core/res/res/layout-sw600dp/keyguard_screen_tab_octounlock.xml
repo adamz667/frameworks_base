@@ -21,66 +21,34 @@
   state of the device, as well as instructions on how to get past it
   depending on the state of the device.  It is the same for landscape
   and portrait.-->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tabunlock="http://schemas.android.com/apk/res/com.android.tabunlock"
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:gravity="center_horizontal">
+
+<com.android.internal.policy.impl.LockscreenWallpaper
+	android:id="@+id/lockscreen_wallpaper"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent" />
+<GridLayout
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:id="@+id/root">
+    android:gravity="center_horizontal">
 
-    <!-- top: status -->
-    <RelativeLayout
-        android:layout_height="0dip"
-        android:layout_weight="1"
+    <include
+        layout="@layout/keyguard_screen_info"
+        android:id="@+id/screen_info"
         android:layout_width="match_parent"
-        android:gravity="center">
+        android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/keyguard_lockscreen_status_line_font_right_margin" />
 
-        <RelativeLayout android:id="@+id/transport_bg_protect"
-            android:layout_width="512dip"
-            android:layout_height="wrap_content"
-            android:gravity="center">
+    <Space android:layout_gravity="fill" />
 
-            <include layout="@layout/keyguard_screen_status_port"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="50dip"
-                android:layout_marginTop="50dip"
-                android:layout_marginBottom="100dip"
-                android:layout_marginRight="64dip"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentLeft="true"/>
-
-            <!-- Music transport control -->
-            <include android:id="@+id/transport"
-                layout="@layout/keyguard_transport_control"
-                android:layout_row="0"
-                android:layout_column="0"
-                android:layout_rowSpan="3"
-                android:layout_columnSpan="1"
-                android:layout_gravity="fill"
-                android:layout_width="match_parent"
-                android:layout_height="512dip"
-                />
-
-        </RelativeLayout>
-
-    </RelativeLayout>
-
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dip"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/screenLocked"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="24dip"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:layout_marginTop="12dip"
-            android:drawablePadding="4dip"
-            />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="270dip">
 
         <com.android.internal.widget.multiwaveview.MultiWaveView
             android:id="@+id/unlock_widget"
@@ -88,7 +56,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentBottom="true"
-            android:layout_gravity="center"
 
             android:targetDrawables="@array/lockscreen_targets_with_camera"
             android:targetDescriptions="@array/lockscreen_target_descriptions_with_camera"
@@ -100,25 +67,62 @@
             android:hitRadius="@dimen/multiwaveview_hit_radius"
             android:rightChevronDrawable="@drawable/ic_lockscreen_chevron_right"
             android:horizontalOffset="0dip"
-            android:verticalOffset="0dip"
+            android:verticalOffset="50dip"
             android:feedbackCount="3"
             android:vibrationDuration="20"
             />
 
-        <!-- emergency call button shown when sim is PUKd and tab_selector is hidden -->
-        <Button
-            android:id="@+id/emergencyCallButton"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/carrier"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_emergency"
-            android:layout_centerInParent="true"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="90dip"
-            style="@style/Widget.Button.Transparent"
-            android:drawablePadding="8dip"
-            android:visibility="gone"
+            android:layout_marginBottom="50dip"
+            android:gravity="center_horizontal"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
+            android:textColor="?android:attr/textColorSecondary"
             />
+
+    </RelativeLayout>
+
+    <!-- emergency call button shown when sim is PUKd and tab_selector is hidden -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        style="?android:attr/buttonBarStyle"
+        android:gravity="center"
+        android:weightSum="2">
+
+        <Button android:id="@+id/emergencyCallButton"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            style="?android:attr/buttonBarButtonStyle"
+            android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
+            android:text="@*android:string/lockscreen_emergency_call"
+            android:drawableLeft="@*android:drawable/lockscreen_emergency_button"
+            android:drawablePadding="0dip"
+            android:visibility="gone"
+        />
+
     </LinearLayout>
 
-</LinearLayout>
+    <!-- Music transport control -->
+    <include android:id="@+id/transport"
+        layout="@layout/keyguard_transport_control"
+        android:layout_row="0"
+        android:layout_column="0"
+        android:layout_rowSpan="2"
+        android:layout_columnSpan="1"
+        android:layout_gravity="fill"
+        android:layout_width="0dip"
+        android:layout_height="0dip"
+        />
+
+</GridLayout>
+</RelativeLayout>
 

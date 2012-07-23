@@ -158,7 +158,7 @@ public:
     // Example value: "(10500,26623),(15000,26623),(30000,30000)"
     static const char KEY_SUPPORTED_PREVIEW_FPS_RANGE[];
     // The image format for preview frames. See CAMERA_MSG_PREVIEW_FRAME in
-    // frameworks/base/include/camera/Camera.h.
+    // system/core/include/system/camera.h.
     // Example value: "yuv420sp" or PIXEL_FORMAT_XXX constants. Read/write.
     static const char KEY_PREVIEW_FORMAT[];
     // Supported image formats for preview frames.
@@ -197,7 +197,7 @@ public:
     // Example value: "2048x1536,1024x768". Read only.
     static const char KEY_SUPPORTED_PICTURE_SIZES[];
     // The image format for captured pictures. See CAMERA_MSG_COMPRESSED_IMAGE
-    // in frameworks/base/include/camera/Camera.h.
+    // in system/core/include/system/camera.h.
     // Example value: "jpeg" or PIXEL_FORMAT_XXX constants. Read/write.
     static const char KEY_PICTURE_FORMAT[];
     // Supported image formats for captured pictures.
@@ -481,7 +481,7 @@ public:
     // value is "true". It is not supported if the value is not "true" or the
     // key does not exist.
     // See CAMERA_CMD_START_SMOOTH_ZOOM, CAMERA_CMD_STOP_SMOOTH_ZOOM, and
-    // CAMERA_MSG_ZOOM in frameworks/base/include/camera/Camera.h.
+    // CAMERA_MSG_ZOOM in system/core/include/system/camera.h.
     // Example value: "true". Read only.
     static const char KEY_SMOOTH_ZOOM_SUPPORTED[];
 
@@ -515,7 +515,7 @@ public:
     static const char KEY_VIDEO_SIZE[];
     // A list of the supported dimensions in pixels (width x height)
     // for video frames. See CAMERA_MSG_VIDEO_FRAME for details in
-    // frameworks/base/include/camera/Camera.h.
+    // system/core/include/system/camera.h.
     // Example: "176x144,1280x720". Read only.
     static const char KEY_SUPPORTED_VIDEO_SIZES[];
 
@@ -544,7 +544,7 @@ public:
     static const char KEY_PREFERRED_PREVIEW_SIZE_FOR_VIDEO[];
 
     // The image format for video frames. See CAMERA_MSG_VIDEO_FRAME in
-    // frameworks/base/include/camera/Camera.h.
+    // system/core/include/system/camera.h.
     // Example value: "yuv420sp" or PIXEL_FORMAT_XXX constants. Read only.
     static const char KEY_VIDEO_FRAME_FORMAT[];
 
@@ -580,8 +580,6 @@ public:
     static const char KEY_FULL_VIDEO_SNAP_SUPPORTED[];
 
 #ifdef QCOM_HARDWARE
-    static const char KEY_ISO_MODE[];
-    static const char KEY_SUPPORTED_ISO_MODES[];
     static const char KEY_LENSSHADE[] ;
     static const char KEY_SUPPORTED_LENSSHADE_MODES[] ;
 
@@ -593,6 +591,10 @@ public:
     static const char KEY_GPS_ALTITUDE_REF[];
     static const char KEY_GPS_STATUS[];
     static const char KEY_EXIF_DATETIME[];
+#ifndef SAMSUNG_CAMERA_HARDWARE
+    static const char KEY_ISO_MODE[];
+    static const char KEY_SUPPORTED_ISO_MODES[];
+#endif
 #endif
 
     // The state of the video stabilization. If set to true, both the
@@ -656,9 +658,11 @@ public:
 #endif
 
 #ifdef SAMSUNG_CAMERA_HARDWARE
-     static const char KEY_METERING[];
-     static const char KEY_WDR[];
-     static const char KEY_ANTI_SHAKE_MODE[];
+    static const char KEY_METERING[];
+    static const char KEY_WDR[];
+    static const char KEY_ANTI_SHAKE_MODE[];
+    static const char KEY_ISO_MODE[];
+    static const char KEY_SUPPORTED_ISO_MODES[];
 #endif
 
     // Values for white balance settings.

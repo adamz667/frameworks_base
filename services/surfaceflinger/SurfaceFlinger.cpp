@@ -97,6 +97,10 @@ SurfaceFlinger::SurfaceFlinger()
         mElectronBeamAnimationMode(0),
         mDebugRegion(0),
         mDebugBackground(0),
+        mRenderEffect(0),
+        mRenderColorR(0),
+        mRenderColorG(0),
+        mRenderColorB(0),
         mDebugDDMS(0),
         mDebugDisableHWC(0),
         mDebugDisableTransformHint(0),
@@ -131,11 +135,22 @@ void SurfaceFlinger::init()
     property_get("debug.sf.showbackground", value, "0");
     mDebugBackground = atoi(value);
 
+    property_get("debug.sf.render_effect", value, "0");
+    mRenderEffect = atoi(value);
+
     property_get("debug.sf.ddms", value, "0");
     mDebugDDMS = atoi(value);
 
     property_get("persist.sys.use_dithering", value, "0");
     mUseDithering = atoi(value) == 1;
+
+    // default calibration color set (disabled by default)
+    property_get("debug.sf.render_color_red", value, "975");
+    mRenderColorR = atoi(value);
+    property_get("debug.sf.render_color_green", value, "937");
+    mRenderColorG = atoi(value);
+    property_get("debug.sf.render_color_blue", value, "824");
+    mRenderColorB = atoi(value);
 
     if (mDebugDDMS) {
         DdmConnection::start(getServiceName());
@@ -527,9 +542,6 @@ void SurfaceFlinger::handleConsoleEvents()
 #ifdef QCOM_HDMI_OUT
         updateHwcExternalDisplay(mExtDispOutput);
 #endif
-        // this is a temporary work-around, eventually this should be called
-        // by the power-manager
-        SurfaceFlinger::turnElectronBeamOn(mElectronBeamAnimationMode);
     }
 
     if (what & eConsoleReleased) {
@@ -1877,11 +1889,29 @@ status_t SurfaceFlinger::onTransact(
                 reply->writeInt32(0);
                 reply->writeInt32(mDebugRegion);
                 reply->writeInt32(mDebugBackground);
+                reply->writeInt32(mRenderEffect);
                 return NO_ERROR;
             case 1013: {
                 Mutex::Autolock _l(mStateLock);
                 const DisplayHardware& hw(graphicPlane(0).displayHardware());
                 reply->writeInt32(hw.getPageFlipCount());
+            }
+            case 1014: { // RENDER_EFFECT
+                // TODO: filter to only allow valid effects
+                mRenderEffect = data.readInt32();
+                return NO_ERROR;
+            }
+            case 1015: { // RENDER_COLOR_RED
+                mRenderColorR = data.readInt32();
+                return NO_ERROR;
+            }
+            case 1016: { // RENDER_COLOR_GREEN
+                 mRenderColorG = data.readInt32();
+                return NO_ERROR;
+            }
+            case 1017: { // RENDER_COLOR_BLUE
+                 mRenderColorB = data.readInt32();
+                return NO_ERROR;
             }
             return NO_ERROR;
         }
@@ -2167,7 +2197,7 @@ status_t SurfaceFlinger::electronBeamOnAnimationImplLocked()
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const uint32_t hw_w = hw.getWidth();
     const uint32_t hw_h = hw.getHeight();
-    const Region screenBounds(hw.bounds());
+    const Region screenBounds(hw.getBounds());
 
     GLfloat u, v;
     GLuint tname;
@@ -2177,9 +2207,9 @@ status_t SurfaceFlinger::electronBeamOnAnimationImplLocked()
     }
 
     GLfloat vtx[8];
-    const GLfloat texCoords[4][2] = { {0,v}, {0,0}, {u,0}, {u,v} };
+    const GLfloat texCoords[4][2] = { {0,0}, {0,v}, {u,v}, {u,0} };
     glBindTexture(GL_TEXTURE_2D, tname);
-    glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
@@ -2236,7 +2266,7 @@ status_t SurfaceFlinger::electronBeamOnAnimationImplLocked()
     };
 
     // the full animation is 12 frames
-    int nbFrames = 8;
+    int nbFrames = 12;
     s_curve_interpolator itr(nbFrames, 7.5f);
     s_curve_interpolator itg(nbFrames, 8.0f);
     s_curve_interpolator itb(nbFrames, 8.5f);
@@ -2254,8 +2284,13 @@ status_t SurfaceFlinger::electronBeamOnAnimationImplLocked()
         hw.flip(screenBounds);
     }
 
-    nbFrames = 4;
     v_stretch vverts(hw_w, hw_h);
+
+    glMatrixMode(GL_TEXTURE);
+    glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
     for (int i=nbFrames-1 ; i>=0 ; i--) {
@@ -2282,6 +2317,12 @@ status_t SurfaceFlinger::electronBeamOnAnimationImplLocked()
         // draw the blue plane
         vverts(vtx, vb);
         glColorMask(0,0,1,1);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+        // draw the white highlight (we use the last vertices)
+        glDisable(GL_TEXTURE_2D);
+        glColorMask(1,1,1,1);
+        glColor4f(vg, vg, vg, 1);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
         hw.flip(screenBounds);
@@ -2766,7 +2807,12 @@ sp<GraphicBuffer> GraphicBufferAlloc::createGraphicBuffer(uint32_t w, uint32_t h
         return 0;
     }
     Mutex::Autolock _l(mLock);
-    mBuffers.add(graphicBuffer);
+    if (-1 != mFreedIndex) {
+        mBuffers.insertAt(graphicBuffer, mFreedIndex);
+        mFreedIndex = -1;
+    } else {
+        mBuffers.add(graphicBuffer);
+    }
 #endif
     return graphicBuffer;
 }

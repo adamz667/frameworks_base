@@ -2414,6 +2414,12 @@ public final class Settings {
         public static final String ENABLE_VOLUME_OPTIONS = "enable_volume_options";
 
         /**
+        * Whether to wake the screen with the trackball. The value is boolean (1 or 0).
+        * @hide
+        */
+        public static final String TRACKBALL_WAKE_SCREEN = "trackball_wake_screen";
+
+        /**
          * Which layout to use to display the navigation menu at the bottom.
          * 0 = default
          * 1 = default w/search

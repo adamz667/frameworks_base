@@ -282,6 +282,7 @@ public class QualcommSharedRIL extends RIL implements CommandsInterface {
         dataCall.cid = 0; // Integer.parseInt(p.readString());
         p.readString();
         dataCall.ifname = p.readString();
+
         if ((dataCall.status == DataConnection.FailCause.NONE.getErrorCode()) &&
              TextUtils.isEmpty(dataCall.ifname) && dataCall.active != 0) {
             throw new RuntimeException(

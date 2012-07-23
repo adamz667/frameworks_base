@@ -28,6 +28,7 @@ ifeq ($(BOARD_CAMERA_USE_MM_HEAP),true)
     LOCAL_CFLAGS += -DCAMERA_MM_HEAP
 endif
 endif
+
 include frameworks/base/media/libstagefright/codecs/common/Config.mk
 
 LOCAL_SRC_FILES:=                         \

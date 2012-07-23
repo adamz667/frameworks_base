@@ -41,12 +41,10 @@
 
 #ifdef QCOM_HARDWARE
 #include <qcom_ui.h>
+#define SHIFT_SRC_TRANSFORM 4
 #endif
 
 #define DEBUG_RESIZE    0
-#ifdef QCOM_HARDWARE
-#define SHIFT_SRC_TRANSFORM 4
-#endif
 
 namespace android {
 
@@ -345,6 +343,7 @@ void Layer::onDraw(const Region& clip) const
             // TODO: we could be more subtle with isFixedSize()
             filter = GL_LINEAR;
         }
+
 #ifdef DECIDE_TEXTURE_TARGET
         glTexParameterx(currentTextureTarget, GL_TEXTURE_MAG_FILTER, filter);
         glTexParameterx(currentTextureTarget, GL_TEXTURE_MIN_FILTER, filter);
@@ -356,12 +355,14 @@ void Layer::onDraw(const Region& clip) const
         glLoadMatrixf(mTextureMatrix);
         glMatrixMode(GL_MODELVIEW);
         glDisable(GL_TEXTURE_2D);
+
 #ifdef DECIDE_TEXTURE_TARGET
         glEnable(currentTextureTarget);
 #else
         glEnable(GL_TEXTURE_EXTERNAL_OES);
 #endif
     } else {
+
 #ifdef DECIDE_TEXTURE_TARGET
         glBindTexture(currentTextureTarget, mFlinger->getProtectedTexName());
 #else
@@ -370,6 +371,7 @@ void Layer::onDraw(const Region& clip) const
         glMatrixMode(GL_TEXTURE);
         glLoadIdentity();
         glMatrixMode(GL_MODELVIEW);
+
 #ifdef DECIDE_TEXTURE_TARGET
         glEnable(currentTextureTarget);
 #else
