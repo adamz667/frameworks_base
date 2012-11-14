@@ -3605,6 +3605,11 @@ void TouchInputMapper::process(const RawEvent* rawEvent) {
     if (rawEvent->type == EV_SYN && rawEvent->code == SYN_REPORT) {
         sync(rawEvent->when);
     }
+#ifdef LEGACY_TRACKPAD
+    else if (rawEvent->type == EV_KEY && rawEvent->code == BTN_MOUSE) {
+        sync(rawEvent->when);
+    }
+#endif
 }
 
 void TouchInputMapper::sync(nsecs_t when) {
