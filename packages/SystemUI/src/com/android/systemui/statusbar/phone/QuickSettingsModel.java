@@ -326,7 +326,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             }
         };
 
-        mFastChargePath = mContext.getString(com.android.internal.R.string.config_fastChargePath);
         mNextAlarmObserver = new NextAlarmObserver(mHandler);
         mNextAlarmObserver.startObserving();
         mBugreportObserver = new BugreportObserver(mHandler);
